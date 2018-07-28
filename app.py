@@ -6,6 +6,7 @@ from flask import Flask
 from twilio.rest import Client
 
 from models import Appointment, db
+from config import NGROK_URL, TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN
 from twilio_views import twilio_views
 
 app = Flask(__name__)
@@ -13,8 +14,7 @@ app.register_blueprint(twilio_views)
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://localhost/praktise-demo')
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-TWILIO_ACCOUNT_SID = 'ACa5dc926f56c7a65f81d63bcafe005dde'
-TWILIO_ACCOUNT_TOKEN = '10231467feb9da44c69ddc57b4359228'
+
 twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
@@ -42,7 +42,7 @@ def import_csv():
 
 def make_twilio_call(phone_number, appointment_id):
     call = twilio_client.calls.create(
-                        url='https://62e97129.ngrok.io/call_answered/' + str(appointment_id),
+                        url=NGROK_URL + '/call_answered/' + str(appointment_id),
                         to=phone_number,
                         from_='+15594713206'
                     )
