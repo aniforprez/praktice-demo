@@ -2,7 +2,16 @@ import csv
 import os
 from datetime import datetime
 from flask import Flask
+from models import Appointment, db
 app = Flask(__name__)
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://localhost/praktise-demo')
+SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+with app.app_context():
+    db.init_app(app)
+    db.create_all()
+
 def import_csv():
     filename = os.path.join(SITE_ROOT, 'appointments.csv')
     with open(filename, 'r') as csvfile:
@@ -12,7 +21,11 @@ def import_csv():
             for row in csvlist:
                 datetime_string = row[1] + ' ' + row[2]
                 appointment_datetime = datetime.strptime(datetime_string, '%d-%m-%Y %H:%M')
+                appointment = Appointment(row[0], row[3], appointment_datetime)
+                db.session.add(appointment)
+                db.session.commit()
         except Exception as e:
+            db.session.rollback()
             print(e)
 with app.app_context():
     import_csv()
