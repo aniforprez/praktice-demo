@@ -6,7 +6,11 @@ from flask import Flask
 from twilio.rest import Client
 
 from models import Appointment, db
+from twilio_views import twilio_views
+
 app = Flask(__name__)
+app.register_blueprint(twilio_views)
+
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://localhost/praktise-demo')
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 TWILIO_ACCOUNT_SID = 'ACa5dc926f56c7a65f81d63bcafe005dde'
