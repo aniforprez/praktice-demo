@@ -23,3 +23,23 @@ def answer_call(appointment_id):
 
     return str(response)
 
+@twilio_views.route('/call_answered/menu/<appointment_id>', methods=['POST'])
+def menu(appointment_id):
+    selected_option = request.form['Digits']
+    response = VoiceResponse()
+    if selected_option == '1':
+        response.say('Thanks for the confirmation', voice='alice')
+    elif selected_option == '2':
+        response.say('"Could you please let us know the reason for not being able to attend the appointment after the beep and then hangup', voice='alice')
+        response.record(action=url_for('twilio_views.delay_recording', appointment_id=appointment_id))
+    else:
+        response.say('Wrong digit pressed. Returning', voice='alice')
+        response.redirect(url_for('twilio_views.answer_call', appointment_id=appointment_id))
+    return str(response)
+
+@twilio_views.route('/call_answered/delay_recording/<appointment_id>', methods=['POST'])
+def delay_recording(appointment_id):
+    appointment = Appointment.query.get(appointment_id)
+    appointment.delay_reason = request.form['RecordingUrl']
+    db.session.commit()
+    return Response(200)
